@@ -15,12 +15,11 @@ ZAPI_URL = f"https://api.z-api.io/instances/{ZAPI_INSTANCE_ID}/token/{ZAPI_TOKEN
 # Inicializa a aplicação Flask
 app = Flask(__name__)
 
-# Rota inicial para teste
 @app.route("/")
 def home():
     return "Assistente do vereador está rodando corretamente!"
 
-# Função que gera a resposta usando o ChatGPT (OpenAI 1.x)
+# Nova função atualizada para OpenAI v1+
 def gerar_resposta(mensagem):
     client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
@@ -36,7 +35,6 @@ def gerar_resposta(mensagem):
 
     return resposta.choices[0].message.content.strip()
 
-# Rota webhook para receber mensagens do WhatsApp via Z-API
 @app.route("/webhook", methods=["POST"])
 def webhook():
     data = request.get_json()
@@ -56,7 +54,6 @@ def webhook():
     r = requests.post(ZAPI_URL, json=payload)
     return jsonify({"status": "enviado", "resposta": resposta})
 
-# Rodar localmente ou no Render
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))
     app.run(host="0.0.0.0", port=port)
