@@ -52,5 +52,10 @@ def webhook():
     r = requests.post(ZAPI_URL, json=payload)
     return jsonify({"status": "enviado", "resposta": resposta})
 
+import os
+
 if __name__ == "__main__":
-    app.run(debug=True, port=5000)
+    port = int(os.environ.get("PORT", 10000))  # Obtém a porta definida pelo Render
+    app.run(host="0.0.0.0", port=port)
+
+
