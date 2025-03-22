@@ -19,7 +19,7 @@ app = Flask(__name__)
 def home():
     return "Assistente do vereador está rodando corretamente!"
 
-# Nova função atualizada para OpenAI v1+
+# Função para gerar resposta via OpenAI
 def gerar_resposta(mensagem):
     client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
@@ -38,8 +38,10 @@ def gerar_resposta(mensagem):
 @app.route("/webhook", methods=["POST"])
 def webhook():
     data = request.get_json()
+    print("🔔 JSON recebido:", data)
+
     mensagem = data.get("message")
-    telefone = data.get("phone")
+    telefone = data.get("sender", {}).get("id")
 
     if not mensagem or not telefone:
         return jsonify({"erro": "Mensagem ou telefone ausente"}), 400
