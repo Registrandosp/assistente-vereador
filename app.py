@@ -37,25 +37,37 @@ def gerar_resposta(mensagem):
 
 @app.route("/webhook", methods=["POST"])
 def webhook():
-    data = request.get_json()
-    print("🔔 JSON recebido:", data)
+    try:
+        # Log bruto do corpo da requisição
+        raw_data = request.data.decode()
+        print("📦 Corpo bruto da requisição:", raw_data)
 
-    mensagem = data.get("message")
-    telefone = data.get("sender", {}).get("id")
+        # Processamento do JSON
+        data = request.get_json(force=True)
+        print("🔔 JSON processado:", data)
 
-    if not mensagem or not telefone:
-        return jsonify({"erro": "Mensagem ou telefone ausente"}), 400
+        mensagem = data.get("message")
+        telefone = data.get("sender", {}).get("id")
 
-    resposta = gerar_resposta(mensagem)
+        if not mensagem or not telefone:
+            print("❌ Mensagem ou telefone ausente!")
+            return jsonify({"erro": "Mensagem ou telefone ausente"}), 400
 
-    payload = {
-        "phone": telefone,
-        "message": resposta
-    }
+        resposta = gerar_resposta(mensagem)
 
-    r = requests.post(ZAPI_URL, json=payload)
-    return jsonify({"status": "enviado", "resposta": resposta})
+        payload = {
+            "phone": telefone,
+            "message": resposta
+        }
+
+        r = requests.post(ZAPI_URL, json=payload)
+        return jsonify({"status": "enviado", "resposta": resposta})
+
+    except Exception as e:
+        print("❌ Erro ao processar webhook:", str(e))
+        return jsonify({"erro": "Erro interno"}), 500
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))
     app.run(host="0.0.0.0", port=port)
+
